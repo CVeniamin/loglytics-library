@@ -22,14 +22,14 @@ import io.socket.emitter.Emitter;
  * Created by Veniamin on 18/07/2017.
  */
 
-public class ServiceRTM extends Service {
+public class LoglyticsService extends Service {
 
-    private static final String TAG = "SocketRTMService";
+    private static final String TAG = "LoglyticsService";
     private Socket socket;
     private static final String processId = Integer.toString(android.os.Process
             .myPid());
 
-    public ServiceRTM() {
+    public LoglyticsService() {
         super();
     }
 
