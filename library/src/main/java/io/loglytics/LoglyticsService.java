@@ -1,4 +1,4 @@
-package com.loglytics;
+package io.loglytics;
 
 import android.app.Service;
 import android.content.Intent;
@@ -14,10 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-
 /**
  * Created by Veniamin on 18/07/2017.
  */
@@ -25,9 +21,10 @@ import io.socket.emitter.Emitter;
 public class LoglyticsService extends Service {
 
     private static final String TAG = "LoglyticsService";
-    private Socket socket;
+    private LoglyticsSender sender = new LoglyticsSender();
     private static final String processId = Integer.toString(android.os.Process
             .myPid());
+    private String serverUrl;
 
     public LoglyticsService() {
         super();
@@ -41,36 +38,21 @@ public class LoglyticsService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent.hasExtra("serverUrl")){
+            serverUrl = intent.getStringExtra("serverUrl");
+        }else {
+            serverUrl = "http://10.0.2.2:8080";
+        }
 
         try {
-            socket = IO.socket("http://10.0.2.2:8080");
+            sender.startSocket(serverUrl);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
         Log.d(TAG, "onStartCommand");
+        sender.socketConnection();
 
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                // Sending an object
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("hello", "from java client");
-                    socket.emit("start", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }}).on("event", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-            }
-
-        });
-
-        socket.connect();
         // For each start request, send a message to start a job and deliver the
         // start ID so we know which request we're stopping when we finish the job
         new Thread(new Runnable() {
@@ -168,7 +150,7 @@ public class LoglyticsService extends Service {
                     JSONObject obj = new JSONObject();
                     try {
                         obj.put("payload", line);
-                        socket.emit("foo", obj);
+                        sender.socketEmit("foo", obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -187,6 +169,7 @@ public class LoglyticsService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        socket.disconnect();
+        sender.socketDisconnect();
+//        socket.disconnect();
     }
 }
