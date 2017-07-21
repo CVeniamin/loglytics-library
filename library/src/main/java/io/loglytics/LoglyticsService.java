@@ -25,6 +25,7 @@ public class LoglyticsService extends Service {
     private static final String processId = Integer.toString(android.os.Process
             .myPid());
     private String serverUrl;
+    private String[] date;
 
     public LoglyticsService() {
         super();
@@ -91,27 +92,9 @@ public class LoglyticsService extends Service {
                             e.printStackTrace();
                         }
                     }else {
-                        /*Log.i(TAG, "Service running");
-                        String lastCharTime = startTime.substring(startTime.length() - 3, startTime.length());
-                        int currentTime = Integer.valueOf(lastCharTime);
-                        currentTime++;
 
-                        if (currentTime < 100) {
-                            lastCharTime = String.format("%03d", currentTime);
-                        }
-
-                        if (currentTime == 1000) {
-                            currentTime = 000;
-                            lastCharTime = Integer.toString(currentTime);
-                        }*/
-
-                        //startTime = startTime.substring(0, startTime.length() - 3);
-                        //startTime = startTime.concat(lastCharTime);
                         time = getLog(startTime);
                         startTime = time;
-
-                        //Stop service once it finishes its task
-                        //stopSelf();
                     }
                 }
             }
@@ -129,37 +112,25 @@ public class LoglyticsService extends Service {
 
     private String getLog(String startTime) {
 
-        StringBuilder builder = new StringBuilder();
-        String[] date = startTime.split("\\s+");
-        //Log.d(TAG,startTime.concat(" :starting Time"));
+        date = startTime.split("\\s+");
+
         try {
-            //String[] command = new String[] { "logcat", "-t", "20", "-v", "threadtime" };
             String[] command = new String[] { "logcat", "-t", startTime,  "-v", "threadtime" };
             Process process = Runtime.getRuntime().exec(command);
 
             BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
+                    new InputStreamReader(process.getInputStream(), "UTF-8"));
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.contains(processId)) {
-                    builder.append(line);
-                    String getLine = line;
-                    date  =  line.split("\\s+");
+                    String[] payload = line.split("\\s+");
+                    date[0]  = payload[0];
+                    date[1]  = payload[1];
 
-                    JSONObject obj = new JSONObject();
-                    try {
-                        obj.put("payload", line);
-                        sender.socketEmit("foo", obj);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    sender.sendMessage(payload);
                 }
             }
-            //String[] clearCommand = new String[] { "logcat", "-c" };
-            //Runtime.getRuntime().exec(clearCommand);
-            //Log.i(TAG,"logcat clean");
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -170,6 +141,5 @@ public class LoglyticsService extends Service {
     public void onDestroy() {
         super.onDestroy();
         sender.socketDisconnect();
-//        socket.disconnect();
     }
 }

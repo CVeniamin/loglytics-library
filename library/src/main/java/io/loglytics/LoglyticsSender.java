@@ -1,5 +1,7 @@
 package io.loglytics;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,6 +16,7 @@ import io.socket.emitter.Emitter;
  */
 
 public class LoglyticsSender {
+    private String TAG = "LoglyticsSender";
     private Socket socket;
     private String serverUrl;
     private JSONObject message;
@@ -27,6 +30,10 @@ public class LoglyticsSender {
 
     public String getServerUrl() {
         return serverUrl;
+    }
+
+    public JSONObject getMessage() {
+        return message;
     }
 
     public void startSocket(String url) throws URISyntaxException {
@@ -63,4 +70,19 @@ public class LoglyticsSender {
     public void socketDisconnect(){
         this.socket.disconnect();
     }
+
+    public JSONObject setMessage(String[] payload) throws JSONException {
+        this.message.put("day", payload[0]);
+        this.message.put("time", payload[1]);
+        return this.message;
+    }
+
+    public void sendMessage(String[] payload){
+        try{
+            socketEmit("foo", setMessage(payload));
+        }catch (JSONException e){
+            Log.d(TAG, e.getMessage());
+        }
+    }
+
 }
