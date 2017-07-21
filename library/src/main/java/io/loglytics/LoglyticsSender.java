@@ -19,7 +19,7 @@ public class LoglyticsSender {
     private String TAG = "LoglyticsSender";
     private Socket socket;
     private String serverUrl;
-    private JSONObject message;
+    private JSONObject message = new JSONObject();
 
     public LoglyticsSender(){
     }
@@ -74,12 +74,14 @@ public class LoglyticsSender {
     public JSONObject setMessage(String[] payload) throws JSONException {
         this.message.put("day", payload[0]);
         this.message.put("time", payload[1]);
+        this.message.put("time", payload[1]);
+
         return this.message;
     }
 
     public void sendMessage(String[] payload){
         try{
-            socketEmit("foo", setMessage(payload));
+            socketEmit("logData", setMessage(payload));
         }catch (JSONException e){
             Log.d(TAG, e.getMessage());
         }

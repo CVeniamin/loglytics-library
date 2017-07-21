@@ -113,9 +113,9 @@ public class LoglyticsService extends Service {
     private String getLog(String startTime) {
 
         date = startTime.split("\\s+");
-
+        String[] payload = new String[4];
         try {
-            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "threadtime" };
+            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "time" };
             Process process = Runtime.getRuntime().exec(command);
 
             BufferedReader bufferedReader = new BufferedReader(
@@ -123,13 +123,14 @@ public class LoglyticsService extends Service {
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains(processId)) {
-                    String[] payload = line.split("\\s+");
-                    date[0]  = payload[0];
-                    date[1]  = payload[1];
+                date = line.split("\\s+");
 
-                    sender.sendMessage(payload);
-                }
+                payload[0] = date[0];
+                payload[1] = date[1];
+                payload[2]= line.substring(19,20);
+                payload[3] = line.substring(21,line.length());
+
+                sender.sendMessage(payload);
             }
         } catch (IOException e) {
             e.printStackTrace();
