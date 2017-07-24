@@ -19,7 +19,6 @@ public class LoglyticsSender {
     private String TAG = "LoglyticsSender";
     private Socket socket;
     private String serverUrl;
-    private JSONObject message = new JSONObject();
 
     public LoglyticsSender(){
     }
@@ -30,10 +29,6 @@ public class LoglyticsSender {
 
     public String getServerUrl() {
         return serverUrl;
-    }
-
-    public JSONObject getMessage() {
-        return message;
     }
 
     public void startSocket(String url) throws URISyntaxException {
@@ -72,11 +67,14 @@ public class LoglyticsSender {
     }
 
     public JSONObject setMessage(String[] payload) throws JSONException {
-        this.message.put("day", payload[0]);
-        this.message.put("time", payload[1]);
-        this.message.put("time", payload[1]);
+        JSONObject message = new JSONObject();
 
-        return this.message;
+        message.put("day", payload[0]);
+        message.put("time", payload[1]);
+        message.put("level", payload[2]);
+        message.put("message", payload[3]);
+
+        return message;
     }
 
     public void sendMessage(String[] payload){
