@@ -31,9 +31,14 @@ public class LoglyticsSender {
         return serverUrl;
     }
 
-    public void startSocket(String url) throws URISyntaxException {
+    public void startSocket(String url) {
         this.serverUrl = url;
-        this.socket = IO.socket(url);
+
+        try{
+            this.socket = IO.socket(url);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
     public void socketConnection(){
         this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
@@ -48,13 +53,7 @@ public class LoglyticsSender {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }}).on("event", new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                }
-
-        });
+            }});
         this.socket.connect();
     }
 

@@ -22,9 +22,8 @@ public class LoglyticsService extends Service {
 
     private static final String TAG = "LoglyticsService";
     private LoglyticsSender sender = new LoglyticsSender();
-    private static final String processId = Integer.toString(android.os.Process
-            .myPid());
-    private String serverUrl;
+
+    private String serverUrl = "";
     private String[] date;
 
     public LoglyticsService() {
@@ -39,60 +38,33 @@ public class LoglyticsService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.hasExtra("serverUrl")){
-            serverUrl = intent.getStringExtra("serverUrl");
-        }else {
-            serverUrl = "http://10.0.2.2:8080";
-        }
 
-        try {
+        setUrl(intent);
+
+        if (!serverUrl.isEmpty()){
             sender.startSocket(serverUrl);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
 
         Log.d(TAG, "onStartCommand");
         sender.socketConnection();
 
-        // For each start request, send a message to start a job and deliver the
-        // start ID so we know which request we're stopping when we finish the job
+        // Starts a new thread that run in background,
+        // obtains application log and then sleep during sleepTime specified
         new Thread(new Runnable() {
 
             @Override
             public void run() {
                 String startTime = "01-01 00:00:00.001";
                 String time = "01-01 00:00:00.002";
-
+                int sleepTime = 3000;
                 while (true) {
-                    // Log.d(TAG, startTime.concat(": before"));
 
                     if (time.equals(startTime)){
-                        try {
-                            Thread.sleep(3000);
 
-                            String lastCharTime = startTime.substring(startTime.length() - 3, startTime.length());
-                            int currentTime = Integer.valueOf(lastCharTime);
-                            startTime = startTime.substring(0, startTime.length() - 3);
-                            currentTime++;
+                        pauseThread(sleepTime);
+                        startTime = incrementTime(startTime);
 
-                            if (currentTime < 100) {
-                                lastCharTime = String.format("%03d", currentTime);
-                                startTime = startTime.concat(lastCharTime);
-
-                            }
-                            if (currentTime == 1000) {
-                                currentTime = 000;
-                                lastCharTime = Integer.toString(currentTime);
-                                startTime = startTime.concat(lastCharTime);
-                            }else {
-                                lastCharTime = Integer.toString(currentTime);
-                                startTime = startTime.concat(lastCharTime);
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                     }else {
-
                         time = getLog(startTime);
                         startTime = time;
                     }
@@ -102,6 +74,45 @@ public class LoglyticsService extends Service {
 
         // If we get killed, after returning from here, restart
         return START_STICKY;
+    }
+
+    private void pauseThread(int sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void setUrl(Intent intent){
+        if (intent.hasExtra("serverURL")){
+            this.serverUrl = intent.getStringExtra("serverURL");
+        }else {
+            //default emulator localhost url
+            this.serverUrl = "http://10.0.2.2:8080";
+        }
+    }
+
+    private String incrementTime(String startTime) {
+        String lastCharTime = startTime.substring(startTime.length() - 3, startTime.length());
+        int currentTime = Integer.valueOf(lastCharTime);
+        startTime = startTime.substring(0, startTime.length() - 3);
+        currentTime++;
+
+        if (currentTime < 100) {
+            lastCharTime = String.format("%03d", currentTime);
+            startTime = startTime.concat(lastCharTime);
+        }
+        if (currentTime == 1000) {
+            currentTime = 000;
+            lastCharTime = Integer.toString(currentTime);
+            startTime = startTime.concat(lastCharTime);
+        }else {
+            lastCharTime = Integer.toString(currentTime);
+            startTime = startTime.concat(lastCharTime);
+        }
+        return startTime;
     }
 
     @Nullable
@@ -127,7 +138,7 @@ public class LoglyticsService extends Service {
 
                 payload[0] = date[0];
                 payload[1] = date[1];
-                payload[2]= line.substring(19,20);
+                payload[2] = line.substring(19,20);
                 payload[3] = line.substring(21,line.length());
 
                 sender.sendMessage(payload);
