@@ -22,6 +22,7 @@ public class LoglyticsService extends Service {
 
     private static final String TAG = "LoglyticsService";
     private LoglyticsSender sender = new LoglyticsSender();
+    private static final String processId = Integer.toString(android.os.Process.myPid());
 
     private String serverUrl = "";
     private String[] date;
@@ -41,11 +42,10 @@ public class LoglyticsService extends Service {
 
         setUrl(intent);
 
-        if (!serverUrl.isEmpty()){
-            sender.startSocket(serverUrl);
+        if (!serverUrl.isEmpty() && intent.hasExtra("token")){
+            sender.startSocket(serverUrl, intent.getStringExtra("token"));
         }
 
-        Log.d(TAG, "onStartCommand");
         sender.socketConnection();
 
         // Starts a new thread that run in background,
@@ -134,14 +134,16 @@ public class LoglyticsService extends Service {
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                date = line.split("\\s+");
+                if (line.contains(processId)) {
+                    date = line.split("\\s+");
 
-                payload[0] = date[0];
-                payload[1] = date[1];
-                payload[2] = line.substring(19,20);
-                payload[3] = line.substring(21,line.length());
+                    payload[0] = date[0];
+                    payload[1] = date[1];
+                    payload[2] = line.substring(19, 20);
+                    payload[3] = line.substring(21, line.length());
 
-                sender.sendMessage(payload);
+                    sender.sendMessage(payload);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

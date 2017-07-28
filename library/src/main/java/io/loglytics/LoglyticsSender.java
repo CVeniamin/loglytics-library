@@ -19,6 +19,7 @@ public class LoglyticsSender {
     private String TAG = "LoglyticsSender";
     private Socket socket;
     private String serverUrl;
+    private String token;
 
     public LoglyticsSender(){
     }
@@ -31,9 +32,9 @@ public class LoglyticsSender {
         return serverUrl;
     }
 
-    public void startSocket(String url) {
+    public void startSocket(String url, String token) {
         this.serverUrl = url;
-
+        this.token = token;
         try{
             this.socket = IO.socket(url);
         } catch (URISyntaxException e) {
@@ -48,12 +49,19 @@ public class LoglyticsSender {
                 // Sending an object
                 JSONObject obj = new JSONObject();
                 try {
-                    obj.put("hello", "from java client");
+                    obj.put("token", token);
                     socket.emit("start", obj);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }});
+            }
+        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                socket.connect();
+            }
+        });
+
         this.socket.connect();
     }
 
@@ -68,6 +76,7 @@ public class LoglyticsSender {
     public JSONObject setMessage(String[] payload) throws JSONException {
         JSONObject message = new JSONObject();
 
+        message.put("token", this.token);
         message.put("day", payload[0]);
         message.put("time", payload[1]);
         message.put("level", payload[2]);
@@ -78,7 +87,7 @@ public class LoglyticsSender {
 
     public void sendMessage(String[] payload){
         try{
-            socketEmit("logData", setMessage(payload));
+            socketEmit("log", setMessage(payload));
         }catch (JSONException e){
             Log.d(TAG, e.getMessage());
         }
