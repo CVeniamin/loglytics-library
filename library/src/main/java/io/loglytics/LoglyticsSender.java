@@ -46,11 +46,23 @@ public class LoglyticsSender {
 
             @Override
             public void call(Object... args) {
-                // Sending an object
+                // Sending an object containing token and information about device
                 JSONObject obj = new JSONObject();
+                String kernel = System.getProperty("os.version"); // OS version
+                String sdk = android.os.Build.VERSION.RELEASE;
+                String device = android.os.Build.DEVICE;
+                String product = android.os.Build.PRODUCT;
+                String model = android.os.Build.MODEL;
+                String brand = android.os.Build.BRAND;
                 try {
                     obj.put("token", token);
-                    socket.emit("start", obj);
+                    obj.put("kernel", kernel);
+                    obj.put("sdk", sdk);
+                    obj.put("device", device);
+                    obj.put("product", product);
+                    obj.put("model", model);
+                    obj.put("brand", brand);
+                    socket.emit("startAndroid", obj);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
