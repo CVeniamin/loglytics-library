@@ -20,6 +20,8 @@ public class LoglyticsSender {
     private Socket socket;
     private String serverUrl;
     private String token;
+    private String id;
+    private String app;
 
     public LoglyticsSender(){
     }
@@ -32,9 +34,11 @@ public class LoglyticsSender {
         return serverUrl;
     }
 
-    public void startSocket(String url, String token) {
+    public void startSocket(String url, String token, String id, String app) {
         this.serverUrl = url;
         this.token = token;
+        this.id = id;
+        this.app = app;
         try{
             this.socket = IO.socket(url);
         } catch (URISyntaxException e) {
@@ -55,7 +59,9 @@ public class LoglyticsSender {
                 String model = android.os.Build.MODEL;
                 String brand = android.os.Build.BRAND;
                 try {
+                    obj.put("id", id);
                     obj.put("token", token);
+                    obj.put("app", app);
                     obj.put("kernel", kernel);
                     obj.put("sdk", sdk);
                     obj.put("device", device);
@@ -89,7 +95,7 @@ public class LoglyticsSender {
         JSONObject message = new JSONObject();
 
         message.put("token", this.token);
-        message.put("day", payload[0]);
+        message.put("date", payload[0]);
         message.put("time", payload[1]);
         message.put("level", payload[2]);
         message.put("message", payload[3]);

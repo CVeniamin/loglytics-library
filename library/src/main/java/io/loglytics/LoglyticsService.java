@@ -3,6 +3,7 @@ package io.loglytics;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -43,7 +44,11 @@ public class LoglyticsService extends Service {
         setUrl(intent);
 
         if (!serverUrl.isEmpty() && intent.hasExtra("token")){
-            sender.startSocket(serverUrl, intent.getStringExtra("token"));
+            String id = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
+            String appName = getApplicationContext().getPackageName();
+
+            sender.startSocket(serverUrl, intent.getStringExtra("token"), id, appName);
+
         }
 
         sender.socketConnection();
