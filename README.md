@@ -58,7 +58,7 @@ Add following this to your ```MainActivity.java```
 ````
 
 And having app.js as follows:
-```
+```node
 var http = require('http'),
     io   = require('socket.io');
 
