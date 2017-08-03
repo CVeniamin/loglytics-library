@@ -34,5 +34,54 @@ If you add a sample app to the same repo then your app needs to have a dependenc
     }
 ```
 
+This Library only supports SDK Version >= 16
 
-This Library only Supports SDK Version >= 16
+#Using Loglytics Platform
+After library installation you need to create an Intent in order to start the service.
+Create this intent inside your ```MainActivity.java```
+```Intent intentService = new Intent(this, LoglyticsService.class);
+```
+
+Then you need to pass a token and url to created Intent.
+You can get this token after signup at https://loglytics.herokuapp.com
+```intentService.putExtra("token", "<YOUR_LIBRARY_TOKEN_HERE>");
+   intentService.putExtra("serverURL", "https://loglytics.herokuapp.com");
+   startService(intentService);
+```
+
+#Test Locally
+If you wish you can test locally by having socketIO server with a nodeJS
+Add following this to your ```MainActivity.java```
+```Intent intentService = new Intent(this, LoglyticsService.class);
+   intentService.putExtra("token", "THIS_SERVES_AS_A_TOKEN");
+   startService(intentService);
+````
+
+And having app.js as follows:
+```
+var http = require('http'),
+    io   = require('socket.io');
+
+var app = http.createServer();
+app.listen(8080);
+
+// Socket.IO server
+var io = io.listen(app);
+
+io.on('connection', function (socket) {
+
+    socket.on('log', function (data, fn) {
+        console.log(data);
+    });
+
+    socket.on('disconnect', function () {
+        console.log("disconnected");
+    });
+});
+```
+
+Run it with:
+```
+node app.js
+```
+
