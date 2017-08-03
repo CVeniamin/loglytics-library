@@ -23,6 +23,7 @@ dependencies {
     compile 'com.github.CVeniamin:loglytics-library:{latest version}'
 }
 ```
+Where `{latest version}` corresponds to tag version, e.g., ``V1.10``
 
 ## Adding a sample app 
 
@@ -36,7 +37,7 @@ If you add a sample app to the same repo then your app needs to have a dependenc
 
 This Library only supports SDK Version >= 16
 
-#Using Loglytics Platform
+### Using Loglytics Platform
 After library installation you need to create an Intent in order to start the service.
 Create this intent inside your ``MainActivity.java``
 
@@ -52,7 +53,8 @@ You can get this token after signup at https://loglytics.herokuapp.com
    startService(intentService);
 ```
 
-#Test Locally
+### Test Locally
+
 If you wish you can test locally by having socketIO server with a nodeJS
 Add following this to your ```MainActivity.java```
 ```java
@@ -85,7 +87,7 @@ io.on('connection', function (socket) {
 ```
 
 Run it with:
-```
+```cmd
 node app.js
 ```
 
