@@ -38,13 +38,16 @@ This Library only supports SDK Version >= 16
 
 #Using Loglytics Platform
 After library installation you need to create an Intent in order to start the service.
-Create this intent inside your ```MainActivity.java```
-```Intent intentService = new Intent(this, LoglyticsService.class);
+Create this intent inside your ``MainActivity.java``
+
+```java
+    Intent intentService = new Intent(this, LoglyticsService.class);
 ```
 
 Then you need to pass a token and url to created Intent.
 You can get this token after signup at https://loglytics.herokuapp.com
-```intentService.putExtra("token", "<YOUR_LIBRARY_TOKEN_HERE>");
+```java
+   intentService.putExtra("token", "<YOUR_LIBRARY_TOKEN_HERE>");
    intentService.putExtra("serverURL", "https://loglytics.herokuapp.com");
    startService(intentService);
 ```
@@ -52,7 +55,8 @@ You can get this token after signup at https://loglytics.herokuapp.com
 #Test Locally
 If you wish you can test locally by having socketIO server with a nodeJS
 Add following this to your ```MainActivity.java```
-```Intent intentService = new Intent(this, LoglyticsService.class);
+```java
+Intent intentService = new Intent(this, LoglyticsService.class);
    intentService.putExtra("token", "THIS_SERVES_AS_A_TOKEN");
    startService(intentService);
 ````
