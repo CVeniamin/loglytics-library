@@ -95,6 +95,8 @@ public class LoglyticsSender {
         JSONObject message = new JSONObject();
 
         message.put("token", this.token);
+        message.put("id", this.id);
+        message.put("app", this.app);
         message.put("date", payload[0]);
         message.put("time", payload[1]);
         message.put("level", payload[2]);
