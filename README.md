@@ -56,7 +56,7 @@ You can get this token after signup at https://loglytics.herokuapp.com
 If you wish you can test locally by having socketIO server with a nodeJS
 Add following this to your ```MainActivity.java```
 ```java
-Intent intentService = new Intent(this, LoglyticsService.class);
+   Intent intentService = new Intent(this, LoglyticsService.class);
    intentService.putExtra("token", "THIS_SERVES_AS_A_TOKEN");
    startService(intentService);
 ````
