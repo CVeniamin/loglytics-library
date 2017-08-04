@@ -23,6 +23,7 @@ dependencies {
     compile 'com.github.CVeniamin:loglytics-library:{latest version}'
 }
 ```
+Where `{latest version}` corresponds to tag version, e.g., ``V1.10``
 
 ## Adding a sample app 
 
@@ -36,29 +37,34 @@ If you add a sample app to the same repo then your app needs to have a dependenc
 
 This Library only supports SDK Version >= 16
 
-#Using Loglytics Platform
+### Using Loglytics Platform
 After library installation you need to create an Intent in order to start the service.
-Create this intent inside your ```MainActivity.java```
-```Intent intentService = new Intent(this, LoglyticsService.class);
+Create this intent inside your ``MainActivity.java``
+
+```java
+    Intent intentService = new Intent(this, LoglyticsService.class);
 ```
 
 Then you need to pass a token and url to created Intent.
 You can get this token after signup at https://loglytics.herokuapp.com
-```intentService.putExtra("token", "<YOUR_LIBRARY_TOKEN_HERE>");
+```java
+   intentService.putExtra("token", "<YOUR_LIBRARY_TOKEN_HERE>");
    intentService.putExtra("serverURL", "https://loglytics.herokuapp.com");
    startService(intentService);
 ```
 
-#Test Locally
+### Test Locally
+
 If you wish you can test locally by having socketIO server with a nodeJS
 Add following this to your ```MainActivity.java```
-```Intent intentService = new Intent(this, LoglyticsService.class);
+```java
+   Intent intentService = new Intent(this, LoglyticsService.class);
    intentService.putExtra("token", "THIS_SERVES_AS_A_TOKEN");
    startService(intentService);
 ````
 
 And having app.js as follows:
-```
+```node
 var http = require('http'),
     io   = require('socket.io');
 
@@ -81,7 +87,7 @@ io.on('connection', function (socket) {
 ```
 
 Run it with:
-```
+```cmd
 node app.js
 ```
 
