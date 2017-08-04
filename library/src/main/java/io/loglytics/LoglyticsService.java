@@ -22,22 +22,52 @@ import java.net.URISyntaxException;
 public class LoglyticsService extends Service {
 
     private static final String TAG = "LoglyticsService";
+
+    /**
+     *Creates a new instance of sender
+     * */
     private LoglyticsSender sender = new LoglyticsSender();
+
+    /**
+     * Used to check if the log is from application running the library
+     * */
     private static final String processId = Integer.toString(android.os.Process.myPid());
 
-    private String serverUrl = "";
-    private String[] date;
+    /**
+     *Server URL where log data should be sent
+     * */
+    private String serverUrl;
+
+    /**
+     *Used to store most recent log time from last invocation of getLog()
+     * */
+    private String[] recentTime;
+
+    /**
+    * Thread sleep interval (3s)
+    */
+    private final int SLEEP_TIME = 3000;
 
     public LoglyticsService() {
         super();
     }
 
+
+    /**
+     * This method runs when LoglyticsService was created
+     * At this moment only calls parent constructor
+     * */
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate");
     }
 
+    /**
+     * Method runs when LoglyticsService started
+     * Receives an Intent from application MainActivity with a token and a url
+     * Creates a new Thread that will run in background until application gets killed
+     * Inside Thread getLog method will continuously obtain application log
+     * */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -46,32 +76,25 @@ public class LoglyticsService extends Service {
         if (!serverUrl.isEmpty() && intent.hasExtra("token")){
             String id = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
             String appName = getApplicationContext().getPackageName();
-
             sender.startSocket(serverUrl, intent.getStringExtra("token"), id, appName);
-
         }
 
         sender.socketConnection();
 
-        // Starts a new thread that run in background,
-        // obtains application log and then sleep during sleepTime specified
         new Thread(new Runnable() {
 
             @Override
             public void run() {
                 String startTime = "01-01 00:00:00.001";
-                String time = "01-01 00:00:00.002";
-                int sleepTime = 3000;
+                String nextTime = "01-01 00:00:00.002";
+
                 while (true) {
-
-                    if (time.equals(startTime)){
-
-                        pauseThread(sleepTime);
+                    if (nextTime.equals(startTime)){
+                        pauseThread();
                         startTime = incrementTime(startTime);
-
                     }else {
-                        time = getLog(startTime);
-                        startTime = time;
+                        nextTime = getLog(startTime);
+                        startTime = nextTime;
                     }
                 }
             }
@@ -81,42 +104,62 @@ public class LoglyticsService extends Service {
         return START_STICKY;
     }
 
-    private void pauseThread(int sleepTime) {
+    /**
+     * Method used to pause the Thread for SLEEP_TIME interval
+     * */
+    private void pauseThread() {
         try {
-            Thread.sleep(sleepTime);
+            Thread.sleep(SLEEP_TIME);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-
+    /**
+     * Method assigns serverUrl obtained from MainActivity Intent
+     * If Intent hasn't a "serverURL" extra
+     * Then default (emulator localhost) "http://10.0.2.2:8080" is used
+     * */
     private void setUrl(Intent intent){
         if (intent.hasExtra("serverURL")){
             this.serverUrl = intent.getStringExtra("serverURL");
         }else {
-            //default emulator localhost url
             this.serverUrl = "http://10.0.2.2:8080";
         }
     }
 
+    /**
+     * Method used to increment log time
+     * Obtained from last execution of getLog()
+     * */
     private String incrementTime(String startTime) {
+
+        //get last three chars from startTime
         String lastCharTime = startTime.substring(startTime.length() - 3, startTime.length());
-        int currentTime = Integer.valueOf(lastCharTime);
+
+        //create a substring without last three chars
         startTime = startTime.substring(0, startTime.length() - 3);
+
+        //get value from last three chars, e.g., "009" => 9
+        int currentTime = Integer.valueOf(lastCharTime);
+
+        //increment 9 to become 10
         currentTime++;
 
         if (currentTime < 100) {
+            //reformat 10 to "010"
             lastCharTime = String.format("%03d", currentTime);
-            startTime = startTime.concat(lastCharTime);
-        }
-        if (currentTime == 1000) {
-            currentTime = 000;
+        }else{
+            //case gets to 1000 restart to 000
+            if (currentTime == 1000) {
+                currentTime = 000;
+            }
             lastCharTime = Integer.toString(currentTime);
-            startTime = startTime.concat(lastCharTime);
-        }else {
-            lastCharTime = Integer.toString(currentTime);
-            startTime = startTime.concat(lastCharTime);
         }
+
+        //reconstructs startTime with incremented last three chars
+        startTime = startTime.concat(lastCharTime);
+
         return startTime;
     }
 
@@ -126,9 +169,12 @@ public class LoglyticsService extends Service {
         return null;
     }
 
+    /**
+     * Method reads log using logcat command from time specified as argument
+     * Obtained log is parsed into a payload and sent using LoglyticsSender to remote server
+     * */
     private String getLog(String startTime) {
-
-        date = startTime.split("\\s+");
+        recentTime = startTime.split("\\s+"); //fallback assignment in case there isn't new log
         String[] payload = new String[4];
         try {
             String[] command = new String[] { "logcat", "-t", startTime,  "-v", "time" };
@@ -140,10 +186,10 @@ public class LoglyticsService extends Service {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.contains(processId)) {
-                    date = line.split("\\s+");
+                    recentTime = line.split("\\s+");
 
-                    payload[0] = date[0];
-                    payload[1] = date[1];
+                    payload[0] = recentTime[0];
+                    payload[1] = recentTime[1];
                     payload[2] = line.substring(19, 20);
                     payload[3] = line.substring(21, line.length());
 
@@ -153,9 +199,12 @@ public class LoglyticsService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return date[0].concat(" ").concat((date[1]));
+        return recentTime[0].concat(" ").concat((recentTime[1]));
     }
 
+    /**
+     * Used to disconnect socket when service is destroyed
+     * */
     @Override
     public void onDestroy() {
         super.onDestroy();

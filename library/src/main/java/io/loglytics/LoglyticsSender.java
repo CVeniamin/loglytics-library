@@ -23,8 +23,7 @@ public class LoglyticsSender {
     private String id;
     private String app;
 
-    public LoglyticsSender(){
-    }
+    public LoglyticsSender(){}
 
     public Socket getSocket(String url) {
         return socket;
@@ -34,6 +33,9 @@ public class LoglyticsSender {
         return serverUrl;
     }
 
+    /**
+     * Method used to create a new socket and assignment of class attributes
+     * */
     public void startSocket(String url, String token, String id, String app) {
         this.serverUrl = url;
         this.token = token;
@@ -45,6 +47,11 @@ public class LoglyticsSender {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Used to create a new connection
+     * Upon established connection send device info to remote server
+     * */
     public void socketConnection(){
         this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
@@ -83,14 +90,23 @@ public class LoglyticsSender {
         this.socket.connect();
     }
 
+    /**
+     * Stub method used to send JSONObject to a server defined by url
+     * */
     public void socketEmit(String url, JSONObject obj){
         this.socket.emit(url, obj);
     }
 
+    /**
+     * Stub method used to disconnect a socket
+     * */
     public void socketDisconnect(){
         this.socket.disconnect();
     }
 
+    /**
+     * Method used to create a JSONObject from payload
+     * */
     public JSONObject setMessage(String[] payload) throws JSONException {
         JSONObject message = new JSONObject();
 
@@ -105,6 +121,9 @@ public class LoglyticsSender {
         return message;
     }
 
+    /**
+     * Method used to send a JSONObject message to server
+     * */
     public void sendMessage(String[] payload){
         try{
             socketEmit("log", setMessage(payload));
