@@ -177,7 +177,7 @@ public class LoglyticsService extends Service {
     private String getLog(String startTime) {
         recentTime = startTime.split("\\s+"); //fallback assignment in case there isn't new log
         try {
-            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "time" };
+            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "long" };
 
             Process process = Runtime.getRuntime().exec(command);
             Scanner scanner = new Scanner(new InputStreamReader(process.getInputStream()));
