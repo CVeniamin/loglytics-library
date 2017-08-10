@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.util.Scanner;
 
 /**
  * Created by Veniamin on 18/07/2017.
@@ -175,31 +176,59 @@ public class LoglyticsService extends Service {
      * */
     private String getLog(String startTime) {
         recentTime = startTime.split("\\s+"); //fallback assignment in case there isn't new log
-        String[] payload = new String[4];
         try {
             String[] command = new String[] { "logcat", "-t", startTime,  "-v", "time" };
+
             Process process = Runtime.getRuntime().exec(command);
+            Scanner scanner = new Scanner(new InputStreamReader(process.getInputStream()));
+            scanner.useDelimiter("\n\n|\n\n\n");
 
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), "UTF-8"));
-
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains(processId)) {
-                    recentTime = line.split("\\s+");
-
-                    payload[0] = recentTime[0];
-                    payload[1] = recentTime[1];
-                    payload[2] = line.substring(19, 20);
-                    payload[3] = line.substring(21, line.length());
-
-                    sender.sendMessage(payload);
-                }
+            while (scanner.hasNext()) {
+                String line = scanner.next();
+                String[] payload = parseLine(line);
+                recentTime[0] =  payload[0];
+                recentTime[1] =  payload[1];
+                sender.sendMessage(payload);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            String[] clearCommand = new String[] { "logcat", "-c" };
+            try {
+                Runtime.getRuntime().exec(clearCommand);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return recentTime[0].concat(" ").concat((recentTime[1]));
+        return recentTime[0] + " " + recentTime[1];
+    }
+
+    /**
+     * This method parses a line coming from Scanner that reads logs
+     * Splits line in two by "]" and by "[" separators
+     * Allowing to return date, time, level and message
+     * A line example could be:
+     *"--------- beginning of main
+     *[ 08-10 10:22:22.806 25519:25526 I/art      ]
+     *Starting a blocking GC Instrumentation"
+     */
+    private String[] parseLine(String line) {
+        String[] payload = new String[4];
+
+        String[] data = line.split("\\[");
+        data = data[1].split("\\]");
+        String[] levelSender = data[0].split("\\/");
+        String level = levelSender[0].substring(levelSender[0].length() - 1, levelSender[0].length());
+        String message = levelSender[1] + ": " + data[1].trim().replace("\n", "<br />").replace("\t", "&emsp;&emsp;");
+
+        String[] aux_payload = data[0].split("\\s+");
+        payload[0] = aux_payload[1]; //date
+        payload[1] = aux_payload[2]; //time
+        payload[2] = level;
+        payload[3] = message;
+
+        return payload;
     }
 
     /**
