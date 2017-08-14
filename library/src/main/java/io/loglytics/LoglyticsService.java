@@ -181,14 +181,16 @@ public class LoglyticsService extends Service {
 
             Process process = Runtime.getRuntime().exec(command);
             Scanner scanner = new Scanner(new InputStreamReader(process.getInputStream()));
-            scanner.useDelimiter("\n\n|\n\n\n");
+            scanner.useDelimiter("(.*?)(\n\\[)");
 
             while (scanner.hasNext()) {
                 String line = scanner.next();
-                String[] payload = parseLine(line);
-                recentTime[0] =  payload[0];
-                recentTime[1] =  payload[1];
-                sender.sendMessage(payload);
+                if (!line.isEmpty()){
+                    String[] payload = parseLine(line);
+                    recentTime[0] =  payload[0];
+                    recentTime[1] =  payload[1];
+                    sender.sendMessage(payload);
+                }
             }
 
         } catch (IOException e) {
@@ -206,7 +208,7 @@ public class LoglyticsService extends Service {
 
     /**
      * This method parses a line coming from Scanner that reads logs
-     * Splits line in two by "]" and by "[" separators
+     * Splits line by "[" separator
      * Allowing to return date, time, level and message
      * A line example could be:
      *"--------- beginning of main
@@ -216,15 +218,14 @@ public class LoglyticsService extends Service {
     private String[] parseLine(String line) {
         String[] payload = new String[4];
 
-        String[] data = line.split("\\[");
-        data = data[1].split("\\]");
+        String[] data = line.split("\\]");
         String[] levelSender = data[0].split("\\/");
         String level = levelSender[0].substring(levelSender[0].length() - 1, levelSender[0].length());
-        String message = levelSender[1] + ": " + data[1].trim().replace("\n", "<br />").replace("\t", "&emsp;&emsp;");
+        String message = levelSender[1] + ": " + data[1].trim();
 
         String[] aux_payload = data[0].split("\\s+");
-        payload[0] = aux_payload[1]; //date
-        payload[1] = aux_payload[2]; //time
+        payload[0] = aux_payload[1];
+        payload[1] = aux_payload[2];
         payload[2] = level;
         payload[3] = message;
 
