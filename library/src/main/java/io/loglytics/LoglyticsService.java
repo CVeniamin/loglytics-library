@@ -173,6 +173,9 @@ public class LoglyticsService extends Service {
     /**
      * Method reads log using logcat command from time specified as argument
      * Obtained log is parsed into a payload and sent using LoglyticsSender to remote server
+     * Scanner uses a specific delimiter
+     * in order to verify if log is a pre-determined format
+     * Right now verifies log date and time
      * */
     private String getLog(String startTime) {
         recentTime = startTime.split("\\s+"); //fallback assignment in case there isn't new log
@@ -181,11 +184,12 @@ public class LoglyticsService extends Service {
 
             Process process = Runtime.getRuntime().exec(command);
             Scanner scanner = new Scanner(new InputStreamReader(process.getInputStream()));
-            scanner.useDelimiter("(.*?)(\n\\[)");
+
+            scanner.useDelimiter("(.*?)(\\[)((?=(\\s.*(\\d{4}\\-\\d{2}\\-\\d{2})(\\s)((\\d+\\:){2})(\\d{2}\\.\\d{3}))))");
 
             while (scanner.hasNext()) {
                 String line = scanner.next();
-                if (!line.isEmpty()){
+                if (!line.isEmpty() && !line.contains("--------- beginning of") ){
                     String[] payload = parseLine(line);
                     recentTime[0] =  payload[0];
                     recentTime[1] =  payload[1];
