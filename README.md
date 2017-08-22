@@ -23,11 +23,12 @@ dependencies {
     compile 'com.github.CVeniamin:loglytics-library:{latest version}'
 }
 ```
-Where `{latest version}` corresponds to tag version, e.g., ``V1.15``
+Where `{latest version}` corresponds to tag version, e.g., ``V1.16``
 
 ## Adding a sample app 
 
-If you add a sample app to the same repo then your app needs to have a dependency on the library. To do this in your app/build.gradle add:
+If you add a sample app to the same repo then your app needs to have a dependency on the library. <br/>
+To do this in your app/build.gradle add:
 
 ```gradle
     dependencies {
@@ -53,23 +54,23 @@ Create this intent inside your ``MainActivity.java``
     }
 ```
 
-Then you need to create <meta-data> tag and pass a token to it, <meta-data> must be nested inside <application> tag on AndroidManifest.xml as follows
+Then you need to create <meta-data> tag and pass a token to it, <meta-data> must be nested inside <application> tag on AndroidManifest.xml as follows. <br/>
 You can get this token after signup at https://loglytics.herokuapp.com
 ```xml
     <application
-            ...
-            <meta-data
-                android:name="io.loglytics.token"
-                android:value="YOUR_TOKEN_GOES_HERE"
-                />
-            ...
-        </application>
+        ...
+        <meta-data
+            android:name="io.loglytics.token"
+            android:value="YOUR_TOKEN_GOES_HERE"
+            />
+        ...
+    </application>
 ```
 
 ### Test Locally
 
-If you wish you can test locally by having socketIO server with a nodeJS
-Add following this to your ```MainActivity.java```
+If you wish you can test locally by having socketIO server with a nodeJS.
+Add following this to your ```MainActivity.java```. <br/>
 Here `http://10.0.2.2:8080` represents localhost on android emulator
 ```java
    import io.loglytics.LoglyticsService;
