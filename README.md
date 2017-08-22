@@ -23,7 +23,7 @@ dependencies {
     compile 'com.github.CVeniamin:loglytics-library:{latest version}'
 }
 ```
-Where `{latest version}` corresponds to tag version, e.g., ``V1.10``
+Where `{latest version}` corresponds to tag version, e.g., ``V1.15``
 
 ## Adding a sample app 
 
@@ -42,25 +42,45 @@ After library installation you need to create an Intent in order to start the se
 Create this intent inside your ``MainActivity.java``
 
 ```java
-    Intent intentService = new Intent(this, LoglyticsService.class);
+    import io.loglytics.LoglyticsService;
+    ...
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        String serverURL = "https://loglytics.herokuapp.com";
+        LoglyticsService.start(this, serverURL);
+        ...
+    }
 ```
 
-Then you need to pass a token and url to created Intent.
+Then you need to create <meta-data> tag and pass a token to it, <meta-data> must be nested inside <application> tag on AndroidManifest.xml as follows
 You can get this token after signup at https://loglytics.herokuapp.com
-```java
-   intentService.putExtra("token", "<YOUR_LIBRARY_TOKEN_HERE>");
-   intentService.putExtra("serverURL", "https://loglytics.herokuapp.com");
-   startService(intentService);
+```xml
+    <application
+            ...
+            <meta-data
+                android:name="io.loglytics.token"
+                android:value="YOUR_TOKEN_GOES_HERE"
+                />
+            ...
+        </application>
 ```
 
 ### Test Locally
 
 If you wish you can test locally by having socketIO server with a nodeJS
 Add following this to your ```MainActivity.java```
+Here `http://10.0.2.2:8080` represents localhost on android emulator
 ```java
-   Intent intentService = new Intent(this, LoglyticsService.class);
-   intentService.putExtra("token", "THIS_SERVES_AS_A_TOKEN");
-   startService(intentService);
+   import io.loglytics.LoglyticsService;
+       ...
+       @Override
+       protected void onCreate(Bundle savedInstanceState) {
+           ...
+           String serverURL = "http://10.0.2.2:8080";
+           LoglyticsService.start(this, serverURL);
+           ...
+       }
 ````
 
 And having app.js as follows:

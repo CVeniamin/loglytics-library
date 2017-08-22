@@ -1,7 +1,11 @@
 package io.loglytics;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -53,6 +57,19 @@ public class LoglyticsService extends Service {
         super();
     }
 
+    /**
+     * Method used to start LoglyticsService
+     * Must be called from onCreate() when a user wants to use the library
+     * */
+    public static void start(Context context, String url){
+        Intent intentService = new Intent(context, LoglyticsService.class);
+        String token = getToken(context);
+        if (token != null && url != null){
+            intentService.putExtra("token", token);
+            intentService.putExtra("serverURL", url);
+        }
+        context.startService(intentService);
+    }
 
     /**
      * This method runs when LoglyticsService was created
@@ -127,6 +144,22 @@ public class LoglyticsService extends Service {
         }else {
             this.serverUrl = "http://10.0.2.2:8080";
         }
+    }
+
+    /**
+     * Reads the token from  AndroidManifest.xml <meta-data> tag
+     * This tag must be created inside host application AndroidManifest.xml
+     * */
+    public static String getToken(Context context){
+        String token = null;
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            Bundle bundle = ai.metaData;
+            token = bundle.getString("io.loglytics.token");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return token;
     }
 
     /**
