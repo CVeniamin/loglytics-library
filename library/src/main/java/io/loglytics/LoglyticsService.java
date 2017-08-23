@@ -58,14 +58,22 @@ public class LoglyticsService extends Service {
     }
 
     /**
-     * Method used to start LoglyticsService
+     * Public methods used to start LoglyticsService
      * Must be called from onCreate() when a user wants to use the library
+     * Use start(Context context) when you want to send logs to localhost
+     * Use start(Context context, String url) when you want to send log to another server
      * */
+    public static void start(Context context){
+        LoglyticsService.start(context, null);
+    }
+
     public static void start(Context context, String url){
         Intent intentService = new Intent(context, LoglyticsService.class);
         String token = getToken(context);
-        if (token != null && (url != null || !url.isEmpty())){
+        if (token != null) {
             intentService.putExtra("token", token);
+        }
+        if(url != null || !url.isEmpty()){
             intentService.putExtra("serverURL", url);
         }
         context.startService(intentService);
@@ -150,7 +158,7 @@ public class LoglyticsService extends Service {
      * Reads the token from  AndroidManifest.xml <meta-data> tag
      * This tag must be created inside host application AndroidManifest.xml
      * */
-    public static String getToken(Context context){
+    private static String getToken(Context context){
         String token = null;
         try {
             ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
