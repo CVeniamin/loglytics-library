@@ -64,7 +64,7 @@ public class LoglyticsService extends Service {
     public static void start(Context context, String url){
         Intent intentService = new Intent(context, LoglyticsService.class);
         String token = getToken(context);
-        if (token != null && url != null){
+        if (token != null && (url != null || !url.isEmpty())){
             intentService.putExtra("token", token);
             intentService.putExtra("serverURL", url);
         }
@@ -213,7 +213,7 @@ public class LoglyticsService extends Service {
     private String getLog(String startTime) {
         recentTime = startTime.split("\\s+"); //fallback assignment in case there isn't new log
         try {
-            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "long" };
+            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "long","-v", "year"};
 
             Process process = Runtime.getRuntime().exec(command);
             Scanner scanner = new Scanner(new InputStreamReader(process.getInputStream()));
