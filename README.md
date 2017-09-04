@@ -71,15 +71,14 @@ You can get this token after signup at https://loglytics.herokuapp.com
 
 If you wish you can test locally by having socketIO server with a nodeJS.
 Add following this to your ```MainActivity.java```. <br/>
-Here `http://10.0.2.2:8080` represents localhost on android emulator
+```LoglyticsService.start()``` will use by default the following `http://10.0.2.2:8080` address which represents localhost on android emulator.
 ```java
    import io.loglytics.LoglyticsService;
        ...
        @Override
        protected void onCreate(Bundle savedInstanceState) {
            ...
-           String serverURL = "http://10.0.2.2:8080";
-           LoglyticsService.start(this, serverURL);
+           LoglyticsService.start(this);
            ...
        }
 ````
