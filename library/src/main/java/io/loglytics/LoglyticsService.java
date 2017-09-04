@@ -73,7 +73,7 @@ public class LoglyticsService extends Service {
         if (token != null) {
             intentService.putExtra("token", token);
         }
-        if(url != null || !url.isEmpty()){
+        if(url != null && !url.isEmpty()){
             intentService.putExtra("serverURL", url);
         }
         context.startService(intentService);
