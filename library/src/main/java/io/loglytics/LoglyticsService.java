@@ -53,6 +53,8 @@ public class LoglyticsService extends Service {
     */
     private final int SLEEP_TIME = 3000;
 
+    private static Intent intentService;
+
     public LoglyticsService() {
         super();
     }
@@ -68,7 +70,7 @@ public class LoglyticsService extends Service {
     }
 
     public static void start(Context context, String url){
-        Intent intentService = new Intent(context, LoglyticsService.class);
+        intentService = new Intent(context, LoglyticsService.class);
         String token = getToken(context);
         if (token != null) {
             intentService.putExtra("token", token);
@@ -284,5 +286,13 @@ public class LoglyticsService extends Service {
     public void onDestroy() {
         super.onDestroy();
         sender.socketDisconnect();
+    }
+
+    /**
+     * Method used to stop the service from user side
+     * Must be called from inside Activity onDestroy() method
+     * */
+    public static void stop(Context context){
+        context.stopService(intentService);
     }
 }

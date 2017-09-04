@@ -54,6 +54,19 @@ Create this intent inside your ``MainActivity.java``
     }
 ```
 
+Make sure that you stop the service when destroying your Activity. 
+For that add following code inside `onDestroy()` method.
+```java
+    ...
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ...
+        LoglyticsService.stop(this);
+        
+    }
+```
+
 Then you need to create <meta-data> tag and pass a token to it, <meta-data> must be nested inside <application> tag on AndroidManifest.xml as follows. <br/>
 You can get this token after signup at https://loglytics.herokuapp.com
 ```xml

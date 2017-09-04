@@ -41,8 +41,11 @@ public class LoglyticsSender {
         this.token = token;
         this.id = id;
         this.app = app;
+        IO.Options opts = new IO.Options();
+        opts.reconnection = false;
         try{
-            this.socket = IO.socket(url);
+            this.socket = IO.socket(url, opts);
+            this.socket.io().timeout(-1);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
