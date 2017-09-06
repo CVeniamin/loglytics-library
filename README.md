@@ -19,7 +19,7 @@ and:
 ```gradle
 dependencies {
     ...
-    compile 'com.github.CVeniamin:loglytics-library:{latest version}'
+    compile 'com.github.CVeniamin:loglytics-library:v1.20'
 }
 ```
 Where `{latest version}` corresponds to tag version, e.g., ``v1.20``
