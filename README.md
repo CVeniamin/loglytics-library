@@ -4,8 +4,6 @@
 
 Loglytics Android library project that works with jitpack.io.
 
-For more details check out the [documentation](https://github.com/jitpack/jitpack.io/blob/master/ANDROID.md)
-
 https://jitpack.io/#CVeniamin/loglytics-library
 
 Add it to your build.gradle with:
@@ -20,10 +18,11 @@ and:
 
 ```gradle
 dependencies {
+    ...
     compile 'com.github.CVeniamin:loglytics-library:{latest version}'
 }
 ```
-Where `{latest version}` corresponds to tag version, e.g., ``V1.16``
+Where `{latest version}` corresponds to tag version, e.g., ``v1.20``
 
 ## Adding a sample app 
 
@@ -39,8 +38,7 @@ To do this in your app/build.gradle add:
 This Library only supports SDK Version >= 16
 
 ### Using Loglytics Platform
-After library installation you need to create an Intent in order to start the service.
-Create this intent inside your ``MainActivity.java``
+To use the library you only need to add the following code to your `MainActivity.java`.
 
 ```java
     import io.loglytics.LoglyticsService;
