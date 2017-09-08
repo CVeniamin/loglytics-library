@@ -9,15 +9,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Scanner;
 
 /**
@@ -54,6 +50,8 @@ public class LoglyticsService extends Service {
     private final int SLEEP_TIME = 3000;
 
     private static Intent intentService;
+
+    private String year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
 
     public LoglyticsService() {
         super();
@@ -223,12 +221,18 @@ public class LoglyticsService extends Service {
     private String getLog(String startTime) {
         recentTime = startTime.split("\\s+"); //fallback assignment in case there isn't new log
         try {
-            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "long","-v", "year"};
+            String[] command = new String[] { "logcat", "-t", startTime,  "-v", "long"};
 
             Process process = Runtime.getRuntime().exec(command);
-            Scanner scanner = new Scanner(new InputStreamReader(process.getInputStream()));
 
-            scanner.useDelimiter("(.*?)(\\[)((?=(\\s.*(\\d{4}\\-\\d{2}\\-\\d{2})(\\s)((\\d+\\:){2})(\\d{2}\\.\\d{3}))))");
+            Scanner scanner = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                scanner = new Scanner(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+            }else{
+                scanner = new Scanner(new InputStreamReader(process.getInputStream()));
+            }
+            //check for beginning of log i.e., [ mm-dd hh:mm:ss.
+            scanner.useDelimiter("(.*?)(\\[)((?=(\\s.*(\\d{2}\\-\\d{2})(\\s)((\\d+\\:){2})(\\d{2}\\.\\d{3}))))");
 
             while (scanner.hasNext()) {
                 String line = scanner.next();
@@ -271,7 +275,7 @@ public class LoglyticsService extends Service {
         String message = levelSender[1] + ": " + data[1].trim();
 
         String[] aux_payload = data[0].split("\\s+");
-        payload[0] = aux_payload[1];
+        payload[0] = year + "-" +  aux_payload[1];
         payload[1] = aux_payload[2];
         payload[2] = level;
         payload[3] = message;

@@ -19,7 +19,7 @@ and:
 ```gradle
 dependencies {
     ...
-    compile 'com.github.CVeniamin:loglytics-library:v1.20'
+    compile 'com.github.CVeniamin:loglytics-library:{latest version}'
 }
 ```
 Where `{latest version}` corresponds to tag version, e.g., ``v1.20``
@@ -35,7 +35,7 @@ To do this in your app/build.gradle add:
     }
 ```
 
-This Library only supports SDK Version >= 16
+This Library only supports SDK Version >= 16 and was tested on Android Emulator devices with Android 6 and 7
 
 ### Using Loglytics Platform
 To use the library you only need to add the following code to your `MainActivity.java`.
